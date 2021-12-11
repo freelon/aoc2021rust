@@ -86,12 +86,12 @@ impl Position {
 fn print(state: &State) {
     state
         .keys()
-        .sorted_by_key(|Position { x, y }| y)
-        .group_by(|Position { x, y }| y)
+        .sorted_by_key(|Position { x: _, y }| y)
+        .group_by(|Position { x: _, y }| y)
         .into_iter()
         .for_each(|(y, positions)| {
             let s = positions
-                .sorted_by_key(|Position { x, y }| *x)
+                .sorted_by_key(|Position { x, y: _ }| *x)
                 .map(|p| state.get(p).unwrap().to_string())
                 .collect::<String>();
             log::debug!("line {}: {}", y, s);
@@ -117,13 +117,6 @@ mod test {
 
     #[test]
     pub fn test1() {
-        println!("{:?}", Position::new(0, 0).neighbors());
-
-        assert_eq!(
-            part1(
-                INPUT
-            ),
-            1656
-        );
+        assert_eq!(part1(INPUT), 1656);
     }
 }
