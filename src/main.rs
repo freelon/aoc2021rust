@@ -1,6 +1,9 @@
 mod day01;
 
+use std::fs::File;
+use std::io::prelude::*;
 use std::io::Write;
+use std::path::Path;
 use std::time::Instant;
 
 fn main() {
@@ -10,20 +13,14 @@ fn main() {
         .parse_env(env)
         .init();
 
-    let input1 = "6636827465
-6774248431
-4227386366
-7447452613
-6223122545
-2814388766
-6615551144
-4836235836
-5334783256
-4128344843
-";
+    let mut input = String::new();
+    File::open(&Path::new("input/day01.txt"))
+        .unwrap()
+        .read_to_string(&mut input)
+        .unwrap();
 
     let start = Instant::now();
-    let result = day01::part1(input1);
+    let result = day01::part1(&input);
     println!("Computation took: {:?}", (Instant::now() - start));
     println!("Result: {}", result);
 }
