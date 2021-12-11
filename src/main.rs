@@ -1,4 +1,5 @@
 mod day01;
+mod inputs;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -18,6 +19,8 @@ fn main() {
         .unwrap()
         .read_to_string(&mut input)
         .unwrap();
+
+    let input = inputs::input(2021, 11);
 
     let start = Instant::now();
     let result = day01::part2(&input);
