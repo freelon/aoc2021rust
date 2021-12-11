@@ -1,8 +1,15 @@
 mod day01;
 
+use std::io::Write;
 use std::time::Instant;
 
 fn main() {
+    let env = env_logger::Env::new().filter("RUST_LOG");
+    env_logger::Builder::new()
+        .format(|buf, record| writeln!(buf, "{}", record.args()))
+        .parse_env(env)
+        .init();
+
     let input1 = "6636827465
 6774248431
 4227386366

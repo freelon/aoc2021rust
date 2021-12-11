@@ -20,7 +20,7 @@ pub fn part1(input: &str) -> Counter {
         .collect::<State>();
     (1..=100)
         .fold((state, 0), |(state, flashes), r| {
-            println!("(before) Round {}", r);
+            log::debug!("(before) Round {}", r);
             print(&state);
 
             let (state_after, new_flashes) = round(state);
@@ -45,7 +45,7 @@ fn round(start: State) -> (State, Counter) {
             .map(|(pos, _)| *pos)
             .collect();
 
-        println!("flashing: {:?}", flashing);
+        log::debug!("flashing: {:?}", flashing);
 
         to_increment = flashing
             .iter()
@@ -94,7 +94,7 @@ fn print(state: &State) {
                 .sorted_by_key(|Position { x, y }| *x)
                 .map(|p| state.get(p).unwrap().to_string())
                 .collect::<String>();
-            println!("line {}: {}", y, s);
+            log::debug!("line {}: {}", y, s);
         });
 }
 
