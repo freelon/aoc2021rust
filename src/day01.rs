@@ -1,3 +1,5 @@
+use itertools::FoldWhile::Continue;
+use itertools::FoldWhile::Done;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -13,26 +15,29 @@ pub fn part1(input: &str) -> Counter {
             log::debug!("(before) Round {}", r);
             print(&state);
 
-            let (state_after, new_flashes) = round(state);
+            let (state_after, new_flashes) = play_round(state);
             (state_after, flashes + new_flashes)
         })
         .1
 }
 
+#[allow(dead_code)]
 pub fn part2(input: &str) -> usize {
-    let mut state = parse(input);
-    let mut r = 0;
-    let mut old = 0;
-    while old < state.len() {
-        let (s, o) = round(state);
-        state = s;
-        old = o;
-        r += 1;
-    }
-    r
+    let state = parse(input);
+    (1..)
+        .fold_while((state, 0), |(state, _), round| {
+            let (s, flashing) = play_round(state);
+            if s.len() == flashing {
+                Done((s, round))
+            } else {
+                Continue((s, 0))
+            }
+        })
+        .into_inner()
+        .1
 }
 
-fn round(start: State) -> (State, Counter) {
+fn play_round(start: State) -> (State, Counter) {
     let mut state = start;
     let mut to_increment: Vec<Position> = state.keys().cloned().collect();
     let mut flashed: HashSet<Position> = HashSet::new();
