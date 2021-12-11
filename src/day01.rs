@@ -38,38 +38,40 @@ pub fn part2(input: &str) -> usize {
 }
 
 fn play_round(start: State) -> (State, Counter) {
-    let mut state = start;
-    let mut to_increment: Vec<Position> = state.keys().cloned().collect();
-    let mut flashed: HashSet<Position> = HashSet::new();
-    while !to_increment.is_empty() {
-        for p in to_increment {
-            if let Some(v) = state.get_mut(&p) {
-                *v += 1;
-            }
-        }
-        let flashing: HashSet<Position> = state
-            .iter()
-            .filter(|(pos, v)| **v > 9 && !flashed.contains(pos))
-            .map(|(pos, _)| *pos)
-            .collect();
+    let all = start.keys().cloned().collect();
+    play(start, all, HashSet::new())
+}
 
-        log::debug!("flashing: {:?}", flashing);
-
-        to_increment = flashing
-            .iter()
-            .flat_map(|p| p.neighbors())
-            .filter(|p| state.contains_key(p))
-            .collect();
-        flashed.extend(flashing);
+fn play(mut state: State, to_increment: Vec<Position>, mut flashed: HashSet<Position>) -> (State, Counter) {
+    if to_increment.is_empty() {
+        return (
+            state
+                .into_iter()
+                .map(|(p, v)| (p, if v > 9 { 0 } else { v }))
+                .collect(),
+            flashed.len(),
+        );
     }
 
-    (
-        state
-            .into_iter()
-            .map(|(p, v)| (p, if v > 9 { 0 } else { v }))
-            .collect(),
-        flashed.len(),
-    )
+    for p in to_increment {
+        if let Some(v) = state.get_mut(&p) {
+            *v += 1;
+        }
+    }
+    let flashing: HashSet<Position> = state
+        .iter()
+        .filter(|(pos, v)| **v > 9 && !flashed.contains(pos))
+        .map(|(pos, _)| *pos)
+        .collect();
+
+    let to_increment = flashing
+        .iter()
+        .flat_map(|p| p.neighbors())
+        .filter(|p| state.contains_key(p))
+        .collect();
+    flashed.extend(flashing);
+
+    play(state, to_increment, flashed)
 }
 
 fn parse(input: &str) -> State {
