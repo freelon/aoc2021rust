@@ -1,10 +1,7 @@
-mod day01;
+mod day11;
 mod inputs;
 
-use std::fs::File;
-use std::io::prelude::*;
 use std::io::Write;
-use std::path::Path;
 use std::time::Instant;
 
 fn main() {
@@ -14,16 +11,10 @@ fn main() {
         .parse_env(env)
         .init();
 
-    let mut input = String::new();
-    File::open(&Path::new("input/day01.txt"))
-        .unwrap()
-        .read_to_string(&mut input)
-        .unwrap();
-
     let input = inputs::input(2021, 11);
 
     let start = Instant::now();
-    let result = day01::part2(&input);
+    let result = day11::part2(&input);
     println!("Computation took: {:?}", (Instant::now() - start));
     println!("Result: {}", result);
 }
