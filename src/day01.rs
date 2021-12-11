@@ -5,19 +5,9 @@ use std::collections::HashSet;
 type State = HashMap<Position, Counter>;
 type Counter = usize;
 
+#[allow(dead_code)]
 pub fn part1(input: &str) -> Counter {
-    let state = input
-        .lines()
-        .enumerate()
-        .flat_map(|(y, line)| {
-            line.chars().enumerate().map(move |(x, c)| {
-                (
-                    Position::new(x as i32, y as i32),
-                    c.to_digit(10).unwrap() as Counter,
-                )
-            })
-        })
-        .collect::<State>();
+    let state = parse(input);
     (1..=100)
         .fold((state, 0), |(state, flashes), r| {
             log::debug!("(before) Round {}", r);
@@ -27,6 +17,19 @@ pub fn part1(input: &str) -> Counter {
             (state_after, flashes + new_flashes)
         })
         .1
+}
+
+pub fn part2(input: &str) -> usize {
+    let mut state = parse(input);
+    let mut r = 0;
+    let mut old = 0;
+    while old < state.len() {
+        let (s, o) = round(state);
+        state = s;
+        old = o;
+        r += 1;
+    }
+    r
 }
 
 fn round(start: State) -> (State, Counter) {
@@ -62,6 +65,21 @@ fn round(start: State) -> (State, Counter) {
             .collect(),
         flashed.len(),
     )
+}
+
+fn parse(input: &str) -> State {
+    input
+        .lines()
+        .enumerate()
+        .flat_map(|(y, line)| {
+            line.chars().enumerate().map(move |(x, c)| {
+                (
+                    Position::new(x as i32, y as i32),
+                    c.to_digit(10).unwrap() as Counter,
+                )
+            })
+        })
+        .collect::<State>()
 }
 
 #[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -118,5 +136,10 @@ mod test {
     #[test]
     pub fn test1() {
         assert_eq!(part1(INPUT), 1656);
+    }
+
+    #[test]
+    pub fn test2() {
+        assert_eq!(part2(INPUT), 195);
     }
 }
