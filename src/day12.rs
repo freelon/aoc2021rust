@@ -5,8 +5,8 @@ use std::collections::HashSet;
 pub fn part1(input: &str) -> usize {
     let neighbors = parse(input);
 
-    find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
-        is_small_cave(cave) && path.contains(&cave.to_owned())
+    find_paths(&neighbors, vec!["start"], &|cave, path| {
+        is_small_cave(cave) && path.contains(&cave)
     })
     .iter()
     .count()
@@ -16,40 +16,40 @@ pub fn part1(input: &str) -> usize {
 pub fn part2(input: &str) -> usize {
     let neighbors = parse(input);
 
-    let small_caves: Vec<String> = neighbors
+    let small_caves: Vec<&str> = neighbors
         .keys()
-        .map(|k| k.to_owned())
-        .filter(|k| is_small_cave(k) && k != "start")
+        .filter(|k| is_small_cave(k) && **k != "start")
+        .map(|k| *k)
         .collect();
         
     small_caves
         .iter()
         .flat_map(|small| {
-            find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
-                if cave == small {
+            find_paths(&neighbors, vec!["start"], &|cave, path| {
+                if cave == *small {
                     path.iter().filter(|k| k == &small).count() == 2
                 } else {
-                    is_small_cave(cave) && path.contains(&cave.to_owned())
+                    is_small_cave(cave) && path.contains(&cave)
                 }
             })
         })
-        .collect::<HashSet<Vec<String>>>()
+        .collect::<HashSet<Vec<&str>>>()
         .len()
 }
 
-fn find_paths<F>(
-    map: &HashMap<String, Vec<String>>,
-    path_so_far: Vec<String>,
+fn find_paths<'a, F>(
+    map: &'a HashMap<&str, Vec<&str>>,
+    path_so_far: Vec<&'a str>,
     f: &F,
-) -> HashSet<Vec<String>>
+) -> HashSet<Vec<&'a str>>
 where
-    F: Fn(&str, &Vec<String>) -> bool,
+    F: Fn(&str, &Vec<&str>) -> bool,
 {
     let head = path_so_far.last().unwrap();
 
-    if head == "end" {
-        let mut result = HashSet::new();
-        result.insert(path_so_far);
+    if *head == "end" {
+        let mut result = HashSet::<Vec<&str>>::new();
+        result.insert(path_so_far.iter().map(|cave| *cave).collect());
         return result;
     }
 
@@ -72,24 +72,24 @@ fn is_small_cave(cave: &str) -> bool {
     cave == cave.to_lowercase()
 }
 
-fn parse(input: &str) -> HashMap<String, Vec<String>> {
-    let mut neighbors: HashMap<String, Vec<String>> = HashMap::new();
+fn parse(input: &str) -> HashMap<&str, Vec<&str>> {
+    let mut neighbors: HashMap<&str, Vec<&str>> = HashMap::new();
 
     input.lines().for_each(|line| {
         let l: Vec<&str> = line.split("-").collect();
-        let a = l.get(0).unwrap().to_string();
-        let b = l.get(1).unwrap().to_string();
-        if !neighbors.contains_key(&a) {
-            neighbors.insert(a.clone(), vec![]);
+        let a = l.get(0).unwrap();
+        let b = l.get(1).unwrap();
+        if !neighbors.contains_key(a) {
+            neighbors.insert(a, vec![]);
         }
-        if !neighbors.contains_key(&b) {
-            neighbors.insert(b.clone(), vec![]);
+        if !neighbors.contains_key(b) {
+            neighbors.insert(b, vec![]);
         }
 
-        let la = neighbors.get_mut(&a).unwrap();
-        la.push(b.clone());
-        let lb = neighbors.get_mut(&b).unwrap();
-        lb.push(a.clone());
+        let la = neighbors.get_mut(a).unwrap();
+        la.push(b);
+        let lb = neighbors.get_mut(b).unwrap();
+        lb.push(a);
     });
 
     neighbors
