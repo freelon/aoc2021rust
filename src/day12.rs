@@ -48,7 +48,7 @@ where
     map.get(head)
         .unwrap()
         .iter()
-        .flat_map(move |neighbor| {
+        .flat_map(|neighbor| {
             if f(neighbor, &path_so_far) {
                 return HashSet::new();
             } else {
