@@ -3,30 +3,38 @@ use std::collections::HashSet;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
-    let mut neighbors: HashMap<String, Vec<String>> = HashMap::new();
-
-    input.lines().for_each(|line| {
-        let l: Vec<&str> = line.split("-").collect();
-        let a = l.get(0).unwrap().to_string();
-        let b = l.get(1).unwrap().to_string();
-        if !neighbors.contains_key(&a) {
-            neighbors.insert(a.clone(), vec![]);
-        }
-        if !neighbors.contains_key(&b) {
-            neighbors.insert(b.clone(), vec![]);
-        }
-
-        let la = neighbors.get_mut(&a).unwrap();
-        la.push(b.clone());
-        let lb = neighbors.get_mut(&b).unwrap();
-        lb.push(a.clone());
-    });
+    let neighbors = parse(input);
 
     find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
         is_small_cave(cave) && path.contains(&cave.to_owned())
     })
     .iter()
     .count()
+}
+
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    let neighbors = parse(input);
+
+    let small_caves: Vec<String> = neighbors
+        .keys()
+        .map(|k| k.to_owned())
+        .filter(|k| is_small_cave(k) && k != "start")
+        .collect();
+        
+    small_caves
+        .iter()
+        .flat_map(|small| {
+            find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
+                if cave == small {
+                    path.iter().filter(|k| k == &small).count() == 2
+                } else {
+                    is_small_cave(cave) && path.contains(&cave.to_owned())
+                }
+            })
+        })
+        .collect::<HashSet<Vec<String>>>()
+        .len()
 }
 
 fn find_paths<F>(
@@ -64,8 +72,7 @@ fn is_small_cave(cave: &str) -> bool {
     cave == cave.to_lowercase()
 }
 
-#[allow(dead_code)]
-pub fn part2(input: &str) -> usize {
+fn parse(input: &str) -> HashMap<String, Vec<String>> {
     let mut neighbors: HashMap<String, Vec<String>> = HashMap::new();
 
     input.lines().for_each(|line| {
@@ -85,24 +92,7 @@ pub fn part2(input: &str) -> usize {
         lb.push(a.clone());
     });
 
-    let small_caves: Vec<String> = neighbors
-        .keys()
-        .map(|k| k.to_owned())
-        .filter(|k| is_small_cave(k) && k != "start")
-        .collect();
-    small_caves
-        .iter()
-        .flat_map(|small| {
-            find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
-                if cave == small {
-                    path.iter().filter(|k| k == &small).count() == 2
-                } else {
-                    is_small_cave(cave) && path.contains(&cave.to_owned())
-                }
-            })
-        })
-        .collect::<HashSet<Vec<String>>>()
-        .len()
+    neighbors
 }
 
 #[cfg(test)]
