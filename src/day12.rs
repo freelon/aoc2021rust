@@ -16,31 +16,23 @@ pub fn part1(input: &str) -> usize {
 pub fn part2(input: &str) -> usize {
     let neighbors = parse(input);
 
-    let small_caves: Vec<&str> = neighbors
-        .keys()
-        .filter(|k| is_small_cave(k) && **k != "start")
-        .map(|k| *k)
-        .collect();
-        
-    small_caves
-        .iter()
-        .flat_map(|small| {
-            find_paths(&neighbors, vec!["start"], &|cave, path| {
-                if cave == *small {
-                    path.iter().filter(|k| k == &small).count() == 2
-                } else {
-                    is_small_cave(cave) && path.contains(&cave)
-                }
-            })
-        })
-        .collect::<HashSet<Vec<&str>>>()
-        .len()
+    find_paths(&neighbors, vec!["start"], &|cave, path| {
+        cave == "start"
+            || is_small_cave(cave)
+                && path.contains(&cave)
+                && path
+                    .iter()
+                    .filter(|c| is_small_cave(c))
+                    .any(|c| path.iter().filter(|v| *v == c).count() > 1)
+    })
+    .iter()
+    .count()
 }
 
 fn find_paths<'a, F>(
     map: &'a HashMap<&str, Vec<&str>>,
     path_so_far: Vec<&'a str>,
-    f: &F,
+    visit_blocked: &F,
 ) -> HashSet<Vec<&'a str>>
 where
     F: Fn(&str, &Vec<&str>) -> bool,
@@ -57,12 +49,12 @@ where
         .unwrap()
         .iter()
         .flat_map(|neighbor| {
-            if f(neighbor, &path_so_far) {
+            if visit_blocked(neighbor, &path_so_far) {
                 return HashSet::new();
             } else {
                 let mut path = path_so_far.clone();
                 path.push(neighbor.to_owned());
-                return find_paths(map, path, f);
+                return find_paths(map, path, visit_blocked);
             }
         })
         .collect()
