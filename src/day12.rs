@@ -23,17 +23,21 @@ pub fn part1(input: &str) -> usize {
         lb.push(a.clone());
     });
 
-    println!("Map: {:?}", neighbors);
-
-    find_paths(&neighbors, vec!["start".to_owned()])
-        .iter()
-        .count()
+    find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
+        is_small_cave(cave) && path.contains(&cave.to_owned())
+    })
+    .iter()
+    .count()
 }
 
-fn find_paths(
+fn find_paths<F>(
     map: &HashMap<String, Vec<String>>,
     path_so_far: Vec<String>,
-) -> HashSet<Vec<String>> {
+    f: &F,
+) -> HashSet<Vec<String>>
+where
+    F: Fn(&str, &Vec<String>) -> bool,
+{
     let head = path_so_far.last().unwrap();
 
     if head == "end" {
@@ -42,17 +46,19 @@ fn find_paths(
         return result;
     }
 
-    map.get(head).unwrap().iter().flat_map(|neighbor| {
-        // only add capitals more than once
-        if is_small_cave(neighbor) && path_so_far.contains(neighbor) {
-            return HashSet::new();
-        } else {
-            let mut path = path_so_far.clone();
-            path.push(neighbor.to_owned());
-            return find_paths(map, path);
-        }
-    })
-    .collect()
+    map.get(head)
+        .unwrap()
+        .iter()
+        .flat_map(move |neighbor| {
+            if f(neighbor, &path_so_far) {
+                return HashSet::new();
+            } else {
+                let mut path = path_so_far.clone();
+                path.push(neighbor.to_owned());
+                return find_paths(map, path, f);
+            }
+        })
+        .collect()
 }
 
 fn is_small_cave(cave: &str) -> bool {
@@ -61,7 +67,28 @@ fn is_small_cave(cave: &str) -> bool {
 
 #[allow(dead_code)]
 pub fn part2(input: &str) -> usize {
-    0
+    let mut neighbors: HashMap<String, Vec<String>> = HashMap::new();
+
+    input.lines().for_each(|line| {
+        let l: Vec<&str> = line.split("-").collect();
+        let a = l.get(0).unwrap().to_string();
+        let b = l.get(1).unwrap().to_string();
+        if !neighbors.contains_key(&a) {
+            neighbors.insert(a.clone(), vec![]);
+        }
+        if !neighbors.contains_key(&b) {
+            neighbors.insert(b.clone(), vec![]);
+        }
+
+        let la = neighbors.get_mut(&a).unwrap();
+        la.push(b.clone());
+        let lb = neighbors.get_mut(&b).unwrap();
+        lb.push(a.clone());
+    });
+
+    find_paths(&neighbors, vec!["start".to_owned()], &|_, _| false)
+        .iter()
+        .count()
 }
 
 #[cfg(test)]
@@ -85,6 +112,6 @@ b-end
 
     #[test]
     pub fn test2() {
-        assert_eq!(part2(INPUT), 133742);
+        assert_eq!(part2(INPUT), 36);
     }
 }
