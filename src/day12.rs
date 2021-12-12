@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -86,9 +85,24 @@ pub fn part2(input: &str) -> usize {
         lb.push(a.clone());
     });
 
-    find_paths(&neighbors, vec!["start".to_owned()], &|_, _| false)
+    let small_caves: Vec<String> = neighbors
+        .keys()
+        .map(|k| k.to_owned())
+        .filter(|k| is_small_cave(k) && k != "start")
+        .collect();
+    small_caves
         .iter()
-        .count()
+        .flat_map(|small| {
+            find_paths(&neighbors, vec!["start".to_owned()], &|cave, path| {
+                if cave == small {
+                    path.iter().filter(|k| k == &small).count() == 2
+                } else {
+                    is_small_cave(cave) && path.contains(&cave.to_owned())
+                }
+            })
+        })
+        .collect::<HashSet<Vec<String>>>()
+        .len()
 }
 
 #[cfg(test)]
