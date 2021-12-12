@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
@@ -8,8 +7,6 @@ pub fn part1(input: &str) -> usize {
     find_paths(&neighbors, vec!["start"], &|cave, path| {
         is_small_cave(cave) && path.contains(&cave)
     })
-    .iter()
-    .count()
 }
 
 #[allow(dead_code)]
@@ -25,39 +22,35 @@ pub fn part2(input: &str) -> usize {
                     .filter(|c| is_small_cave(c))
                     .any(|c| path.iter().filter(|v| *v == c).count() > 1)
     })
-    .iter()
-    .count()
 }
 
 fn find_paths<'a, F>(
     map: &'a HashMap<&str, Vec<&str>>,
     path_so_far: Vec<&'a str>,
     visit_blocked: &F,
-) -> HashSet<Vec<&'a str>>
+) -> usize
 where
     F: Fn(&str, &Vec<&str>) -> bool,
 {
     let head = path_so_far.last().unwrap();
 
     if *head == "end" {
-        let mut result = HashSet::<Vec<&str>>::new();
-        result.insert(path_so_far.iter().map(|cave| *cave).collect());
-        return result;
+        return 1;
     }
 
     map.get(head)
         .unwrap()
         .iter()
-        .flat_map(|neighbor| {
+        .map(|neighbor| {
             if visit_blocked(neighbor, &path_so_far) {
-                return HashSet::new();
+                return 0;
             } else {
                 let mut path = path_so_far.clone();
                 path.push(neighbor.to_owned());
                 return find_paths(map, path, visit_blocked);
             }
         })
-        .collect()
+        .sum()
 }
 
 fn is_small_cave(cave: &str) -> bool {
