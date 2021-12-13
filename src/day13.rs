@@ -45,16 +45,18 @@ pub fn part2(input: &str) {
         })
         .collect_vec();
 
-    let result = assignments.into_iter().fold(map, |map, assignment| fold(map, assignment));
+    let result = assignments
+        .into_iter()
+        .fold(map, |map, assignment| fold(map, assignment));
     print_points(&result);
 }
 
 fn print_points(map: &Points) {
-        let width = map.iter().max_by_key(|(x, _)| x).unwrap().0;
+    let width = map.iter().max_by_key(|(x, _)| x).unwrap().0;
     let height = map.iter().max_by_key(|(_, y)| y).unwrap().1;
     for y in 0..=height {
         for x in 0..=width {
-            let c = if map.contains(&(x,y)) { "#"} else {" "};
+            let c = if map.contains(&(x, y)) { "#" } else { " " };
             print!("{}", c);
         }
         println!()
@@ -64,21 +66,17 @@ fn print_points(map: &Points) {
 fn fold(map: Points, command: (&str, C)) -> Points {
     let (c, at) = command;
     map.into_iter()
-        .map(|(x,y)| {
-            match c {
-                "x" => (y,x),
-                "y" => (x,y),
-                _ => panic!("'{}' is not a valid axis", c)
-            }
+        .map(|(x, y)| match c {
+            "x" => (y, x),
+            "y" => (x, y),
+            _ => panic!("'{}' is not a valid axis", c),
         })
-        .filter(|(_, y)| *y != at)
+        .filter(|&(_, y)| y != at)
         .map(|(x, y)| if y < at { (x, y) } else { (x, 2 * at - y) })
-        .map(|(x,y)| {
-            match c {
-                "x" => (y,x),
-                "y" => (x,y),
-                _ => panic!("'{}' is not a valid axis", c)
-            }
+        .map(|(x, y)| match c {
+            "x" => (y, x),
+            "y" => (x, y),
+            _ => panic!("'{}' is not a valid axis", c),
         })
         .collect()
 }
@@ -114,10 +112,5 @@ fold along x=5
     #[test]
     pub fn test1() {
         assert_eq!(part1(INPUT), 17);
-    }
-
-    #[test]
-    pub fn test2() {
-        // assert_eq!(part2(INPUT), 36);
     }
 }
