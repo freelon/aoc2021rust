@@ -56,7 +56,7 @@ fn print_points(map: &Points) {
     let height = map.iter().max_by_key(|(_, y)| y).unwrap().1;
     for y in 0..=height {
         for x in 0..=width {
-            let c = if map.contains(&(x, y)) { "#" } else { " " };
+            let c = if map.contains(&(x, y)) { "\u{2588}" } else { " " };
             print!("{}", c);
         }
         println!()
