@@ -1,5 +1,6 @@
 mod day11;
 mod day12;
+mod day13;
 mod inputs;
 
 use std::io::Write;
@@ -12,10 +13,10 @@ fn main() {
         .parse_env(env)
         .init();
 
-    let input = inputs::input(2021, 12);
+    let input = inputs::input(2021, 13);
 
     let start = Instant::now();
-    let result = day12::part1(&input);
+    let result = day13::part2(&input);
     println!("Computation took: {:?}", (Instant::now() - start));
-    println!("Result: {}", result);
+    println!("Result: {:?}", result);
 }
