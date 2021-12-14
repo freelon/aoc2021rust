@@ -14,10 +14,10 @@ fn main() {
         .parse_env(env)
         .init();
 
-    let input = inputs::input(2021, 14);
+    let input = inputs::input(2021, 12);
 
     let start = Instant::now();
-    let result = day14::both_parts(&input, 40);
+    let result = day12::part1(&input);
     println!("Computation took: {:?}", (Instant::now() - start));
     println!("Result: {:?}", result);
 }

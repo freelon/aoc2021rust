@@ -4,33 +4,31 @@ use std::collections::HashMap;
 pub fn part1(input: &str) -> usize {
     let neighbors = parse(input);
 
-    find_paths(&neighbors, vec!["start"], &|cave, path| {
+    find_paths(&neighbors, &mut vec!["start"], &|cave, path, _| {
         is_small_cave(cave) && path.contains(&cave)
-    })
+    }, true)
 }
 
 #[allow(dead_code)]
 pub fn part2(input: &str) -> usize {
     let neighbors = parse(input);
 
-    find_paths(&neighbors, vec!["start"], &|cave, path| {
+    find_paths(&neighbors, &mut vec!["start"], &|cave, path, twice_used| {
         cave == "start"
             || is_small_cave(cave)
                 && path.contains(&cave)
-                && path
-                    .iter()
-                    .filter(|c| is_small_cave(c))
-                    .any(|c| path.iter().filter(|v| *v == c).count() > 1)
-    })
+                && twice_used
+    }, false)
 }
 
 fn find_paths<'a, F>(
     map: &'a HashMap<&str, Vec<&str>>,
-    path_so_far: Vec<&'a str>,
+    path_so_far: &mut Vec<&'a str>,
     visit_blocked: &F,
+    twice_used: bool,
 ) -> usize
 where
-    F: Fn(&str, &Vec<&str>) -> bool,
+    F: Fn(&str, &Vec<&str>, bool) -> bool,
 {
     let head = path_so_far.last().unwrap();
 
@@ -42,12 +40,14 @@ where
         .unwrap()
         .iter()
         .map(|neighbor| {
-            if visit_blocked(neighbor, &path_so_far) {
+            if visit_blocked(neighbor, &path_so_far, twice_used) {
                 return 0;
             } else {
-                let mut path = path_so_far.clone();
-                path.push(neighbor.to_owned());
-                return find_paths(map, path, visit_blocked);
+                let visiting_second_time = is_small_cave(&neighbor) && path_so_far.contains(&neighbor);
+                path_so_far.push(neighbor);
+                let sub_count = find_paths(map, path_so_far, visit_blocked, twice_used || visiting_second_time);
+                path_so_far.pop();
+                sub_count
             }
         })
         .sum()
