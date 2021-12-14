@@ -5,13 +5,16 @@ use reqwest::blocking::Client;
 
 pub fn input(year: u16, day: u8) -> String {
     let mut input = String::new();
-    if let Ok(mut file) = File::open(&Path::new(&format!("input/{}/day{}.txt", year, day))) {
+    let path = format!("input/{}/day{}.txt", year, day);
+    let path = Path::new(&path);
+    if let Ok(mut file) = File::open(&path) {
         file.read_to_string(&mut input)
             .expect("failed to read file contents");
     } else {
         input = load_external(year, day);
 
-        // TODO store the retrieves contents
+        let mut file = File::create(&path).unwrap();
+        write!(file, "{}", input).unwrap();
     }
     input
 }
