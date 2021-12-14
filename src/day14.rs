@@ -2,6 +2,7 @@
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::VecDeque;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
@@ -13,7 +14,7 @@ pub fn part1(input: &str) -> usize {
 
     let mut polymer: String = template.to_string();
     for _i in 0..10 {
-        process(&mut polymer, &rules);
+        polymer = fast(polymer, &rules);
     }
     let frequencies = polymer.chars().counts();
     let hfreq = frequencies.iter().max_by_key(|(_k, v)| *v).unwrap();
@@ -22,17 +23,19 @@ pub fn part1(input: &str) -> usize {
     hfreq.1 - lfreq.1
 }
 
-fn process(poly: &mut String, rules: &HashMap<&str, &str>) {
-    let mut i = 0;
-    while i < poly.len() - 1 {
-        let part = &poly[i..=i + 1];
-        if let Some(c) = rules.get(part) {
-            poly.insert(i + 1, c.chars().next().unwrap());
-            i += 2;
-        } else {
-            i += 1;
+fn fast(poly: String, rules: &HashMap<&str, &str>) -> String {
+    let mut back = VecDeque::new();
+    let mut coming = poly.chars();
+    let first = coming.next().unwrap();
+    back.push_back(first);
+    while let Some(head) = coming.next() {
+        let part = &format!("{}{}", back.get(back.len() - 1).unwrap(), head);
+        if let Some(c) = rules.get(part.as_str()) {
+            back.push_back(c.chars().next().unwrap());
         }
+        back.push_back(head);
     }
+    back.into_iter().collect()
 }
 
 #[cfg(test)]
