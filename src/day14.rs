@@ -107,9 +107,6 @@ CN -> C
 
     #[test]
     pub fn test1() {
-        let mut s = "abc".to_string();
-        s.insert(1, 'x');
-        dbg!(s);
         assert_eq!(both_parts(INPUT, 10), 1588);
     }
 
