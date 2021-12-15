@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
@@ -15,6 +14,36 @@ pub fn part1(input: &str) -> usize {
         &map,
         Position::new(0, 0),
         Position::new((side_length - 1) as i32, (side_length - 1) as i32),
+    )
+}
+
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    let side_length = input.trim().lines().count();
+    let map = parse(&input.trim());
+
+    let map = map
+        .into_iter()
+        .flat_map(|(p, d)| {
+            (0..5).flat_map(move |x| {
+                (0..5).map(move |y| {
+                    let new_position =
+                        Position::new(p.x + side_length as i32 * x, p.y + side_length as i32 * y);
+                    let mut danger = d + x as DangerLevel + y as DangerLevel;
+                    while danger > 9 {
+                        danger -= 9;
+                    }
+                    assert_eq!(true, danger < 10);
+                    (new_position, danger)
+                })
+            })
+        })
+        .collect();
+
+    calc_lowest_risk_path(
+        &map,
+        Position::new(0, 0),
+        Position::new((side_length * 5 - 1) as i32, (side_length * 5 - 1) as i32),
     )
 }
 
@@ -102,6 +131,6 @@ mod test {
 
     #[test]
     pub fn test2() {
-        // assert_eq!(both_parts(INPUT, 40), 2188189693529);
+        assert_eq!(part2(INPUT), 315);
     }
 }
