@@ -4,6 +4,19 @@ use std::ops::RangeInclusive;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> i32 {
+    let ((x_start, x_end), (y_start, y_end)) = parse(input);
+
+    (0..=x_end)
+        .flat_map(|vx| {
+            (y_end..=x_end)
+                .map(move |vy| hits((vx, vy), (x_start, y_end), (x_end, y_start)))
+                .flat_map(|o| o)
+        })
+        .max()
+        .unwrap()
+}
+
+fn parse(input: &str) -> ((i32, i32), (i32, i32)) {
     let (a, b) = input
         .trim()
         .strip_prefix("target area: ")
@@ -21,15 +34,20 @@ pub fn part1(input: &str) -> i32 {
         y_start.parse::<i32>().unwrap(),
         y_end.parse::<i32>().unwrap(),
     );
+    ((x_start, x_end), (y_start, y_end))
+}
+
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    let ((x_start, x_end), (y_start, y_end)) = parse(input);
 
     (0..=x_end)
         .flat_map(|vx| {
-            (y_end..=x_end)
-            // .inspect(move |vy| println!("{}-{}", &vx, &vy))
+            (y_start..=x_end)
                 .map(move |vy| hits((vx, vy), (x_start, y_end), (x_end, y_start)))
                 .flat_map(|o| o)
         })
-        .max().unwrap()
+        .count()
 }
 
 type V = (i32, i32);
@@ -38,9 +56,6 @@ fn hits(mut v: V, top_left: V, bottom_right: V) -> Option<i32> {
     let mut probe = (0, 0);
     let mut max_y = 0;
     while probe.0 < bottom_right.0 && probe.1 > bottom_right.1 {
-
-        // println!("{:?} tl: {:?} br: {:?}", v, top_left, bottom_right);
-
         probe = (probe.0 + v.0, probe.1 + v.1);
         max_y = max(max_y, probe.1);
 
@@ -57,7 +72,7 @@ fn hits(mut v: V, top_left: V, bottom_right: V) -> Option<i32> {
         } else {
             0
         };
-        v = (v.0 + dx, v.1 -1);
+        v = (v.0 + dx, v.1 - 1);
     }
     return None;
 }
@@ -78,6 +93,6 @@ mod test {
 
     #[test]
     pub fn test2() {
-        // assert_eq!(part2(INPUT), 315);
+        assert_eq!(part2("target area: x=20..30, y=-10..-5"), 112);
     }
 }

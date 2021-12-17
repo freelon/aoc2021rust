@@ -19,7 +19,7 @@ fn main() {
     let input = inputs::input(2021, 17);
 
     let start = Instant::now();
-    let result = day17::part1(&input);
+    let result = day17::part2(&input);
     println!("Computation took: {:?}", (Instant::now() - start));
     println!("Result: {:?}", result);
 }
