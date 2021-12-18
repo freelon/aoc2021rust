@@ -4,28 +4,58 @@ use std::fmt::Display;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
-    input.lines().map(|line| {
-        let mut chars: VecDeque<char> = line.chars().collect();
-        Number::parse(&mut chars)
-    }).fold(None, |left, right| match left {
-        Some(l) => {
-            let mut x = Pair(Box::new(l), Box::new(right));
-            x.reduce();
-            Some(x)
-        },
-        None => Some(right)
-    })
-    .unwrap()
-    .magnitude()
+    input
+        .lines()
+        .map(|line| {
+            let mut chars: VecDeque<char> = line.chars().collect();
+            Number::parse(&mut chars)
+        })
+        .fold(None, |left, right| match left {
+            Some(l) => Some(Number::add(&l, &right)),
+            None => Some(right),
+        })
+        .unwrap()
+        .magnitude()
 }
 
-#[derive(Debug)]
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    let numbers: Vec<_> = input
+        .lines()
+        .map(|line| {
+            let mut chars: VecDeque<char> = line.chars().collect();
+            Number::parse(&mut chars)
+        })
+        .collect();
+
+    numbers
+        .iter()
+        .flat_map(|a| {
+            numbers.iter().map(move |b| {
+                if a == b {
+                    0
+                } else {
+                    Number::add(a, b).magnitude()
+                }
+            })
+        })
+        .max()
+        .unwrap()
+} // 4709 too high
+
+#[derive(Debug, Clone, PartialEq)]
 enum Number {
     Natural(usize),
     Pair(Box<Number>, Box<Number>),
 }
 
 impl Number {
+    fn add(left: &Self, right: &Self) -> Self {
+        let mut x = Pair(Box::new(left.clone()), Box::new(right.clone()));
+        x.reduce();
+        x
+    }
+
     fn parse(mut input: &mut VecDeque<char>) -> Self {
         let next = input.pop_front().unwrap();
         if next == '[' {
@@ -172,9 +202,7 @@ mod test {
 
     use super::*;
 
-    #[test]
-    pub fn test1() {
-        assert_eq!(part1("[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+    const INPUT: &str = "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
 [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
 [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
@@ -183,11 +211,15 @@ mod test {
 [[[[5,4],[7,7]],8],[[8,3],8]]
 [[9,3],[[9,9],[6,[4,9]]]]
 [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
-[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]"), 4140);
+[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]";
+
+    #[test]
+    pub fn test1() {
+        assert_eq!(part1(INPUT), 4140);
     }
 
     #[test]
     pub fn test2() {
-        // assert_eq!(part2("target area: x=20..30, y=-10..-5"), 112);
+        assert_eq!(part2(INPUT), 3993);
     }
 }
