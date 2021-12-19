@@ -2,6 +2,7 @@ use rustc_hash::FxHashSet;
 use std::ops::Sub;
 
 type MySet = FxHashSet<Vector>;
+const ORIGIN: Vector = Vector::new(0, 0, 0);
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
@@ -23,7 +24,7 @@ pub fn part2(input: &str) -> usize {
 
 fn combine(mut scans: Vec<MySet>) -> (MySet, Vec<Vector>) {
     let mut beacons = scans.remove(0);
-    let mut scanners = vec![Vector::new(0, 0, 0)];
+    let mut scanners = vec![ORIGIN];
     while let Some((i, (result, scanner))) = scans
         .iter()
         .enumerate()
@@ -45,7 +46,7 @@ fn matches(beacons: &MySet, other: &MySet) -> Option<(MySet, Vector)> {
                 let diff = *b - *a;
                 let realigned: MySet = rotation.iter().map(|v| *v - diff).collect();
                 if beacons.intersection(&realigned).count() >= 12 {
-                    return Some((realigned, Vector::new(0, 0, 0) - diff));
+                    return Some((realigned, ORIGIN - diff));
                 }
             }
         }
@@ -120,7 +121,7 @@ impl Sub for Vector {
 }
 
 impl Vector {
-    fn new(x: i32, y: i32, z: i32) -> Self {
+    const fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
     }
 
