@@ -1,4 +1,6 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
+
+type MySet = FxHashSet<Vector>;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
@@ -11,10 +13,14 @@ pub fn part1(input: &str) -> usize {
 pub fn part2(input: &str) -> usize {
     let scans = parse(input);
     let (_, centers) = combine(scans);
-    centers.iter().flat_map(|a| centers.iter().map(|b| a.sub(*b).len())).max().unwrap()
+    centers
+        .iter()
+        .flat_map(|a| centers.iter().map(|b| a.sub(*b).len()))
+        .max()
+        .unwrap()
 }
 
-fn combine(mut scans: Vec<HashSet<Vector>>) -> (HashSet<Vector>, Vec<Vector>) {
+fn combine(mut scans: Vec<MySet>) -> (MySet, Vec<Vector>) {
     let mut beacons = scans.remove(0);
     let mut scanners = vec![Vector::new(0, 0, 0)];
     while let Some((i, (result, scanner))) = scans
@@ -31,15 +37,12 @@ fn combine(mut scans: Vec<HashSet<Vector>>) -> (HashSet<Vector>, Vec<Vector>) {
     (beacons, scanners)
 }
 
-fn matches(
-    beacons: &HashSet<Vector>,
-    other: &HashSet<Vector>,
-) -> Option<(HashSet<Vector>, Vector)> {
+fn matches(beacons: &MySet, other: &MySet) -> Option<(MySet, Vector)> {
     for a in beacons {
         for rotation in other.all_rotations() {
             for b in rotation.iter() {
                 let diff = b.sub(*a);
-                let realigned: HashSet<_> = rotation.iter().map(|v| v.sub(diff)).collect();
+                let realigned: MySet = rotation.iter().map(|v| v.sub(diff)).collect();
                 if beacons.intersection(&realigned).count() >= 12 {
                     return Some((realigned, Vector::new(0, 0, 0).sub(diff)));
                 }
@@ -57,26 +60,29 @@ trait BeaconSet {
         Self: Sized;
 }
 
-impl BeaconSet for HashSet<Vector> {
+impl BeaconSet for MySet {
     fn set_origin_to(&self, origin: Vector) -> Self {
         self.iter().map(|v| v.sub(origin)).collect()
     }
 
     fn all_rotations(&self) -> Vec<Self> {
-        let mut all_expanded: Vec<_> = self.iter().map(|v| v.all_rotations()).collect();
-        let perspectives = all_expanded[0].len();
-        (0..perspectives)
-            .map(|_| {
-                all_expanded
-                    .iter_mut()
-                    .map(|vp| vp.pop().unwrap())
-                    .collect()
-            })
-            .collect()
+        let mut result = vec![];
+        for x_rot in [0, 1] {
+            for y_rot in [0, 1, 2, 3] {
+                for z_rot in [0, 1, 2, 3] {
+                    let r = self
+                        .iter()
+                        .map(|v| v.rot_x_n(x_rot).rot_y_n(y_rot).rot_z_n(z_rot))
+                        .collect();
+                    result.push(r);
+                }
+            }
+        }
+        result
     }
 }
 
-fn parse(input: &str) -> Vec<HashSet<Vector>> {
+fn parse(input: &str) -> Vec<MySet> {
     input
         .trim()
         .split("\n\n")
@@ -117,58 +123,51 @@ impl Vector {
         (self.x.abs() + self.y.abs() + self.z.abs()) as usize
     }
 
-    fn all_rotations(&self) -> Vec<Self> {
-        let Self { x, y, z } = self;
-        [
-            Self {
-                x: *x,
-                y: *z,
-                z: *y,
-            },
-            Self {
-                x: *x,
-                y: *y,
-                z: *z,
-            },
-            Self {
-                x: *y,
-                y: *x,
-                z: *z,
-            },
-            Self {
-                x: *y,
-                y: *z,
-                z: *x,
-            },
-            Self {
-                x: *z,
-                y: *y,
-                z: *x,
-            },
-            Self {
-                x: *z,
-                y: *x,
-                z: *y,
-            },
-        ]
-        .into_iter()
-        .flat_map(|Self { x, y, z }| {
-            [
-                Self { x: x, y: y, z: z },
-                Self { x: x, y: y, z: -z },
-                Self { x: x, y: -y, z: z },
-                Self { x: x, y: -y, z: -z },
-                Self { x: -x, y: y, z: z },
-                Self { x: -x, y: y, z: -z },
-                Self { x: -x, y: -y, z: z },
-                Self {
-                    x: -x,
-                    y: -y,
-                    z: -z,
-                },
-            ]
-        })
-        .collect()
+    fn rot_x(self) -> Self {
+        Self {
+            x: self.x,
+            y: -self.z,
+            z: self.y,
+        }
+    }
+
+    fn rot_x_n(self, n: usize) -> Self {
+        let mut v = self;
+        for _ in 0..n {
+            v = v.rot_x();
+        }
+        v
+    }
+
+    fn rot_y(self) -> Self {
+        Self {
+            x: -self.z,
+            y: self.y,
+            z: self.x,
+        }
+    }
+
+    fn rot_y_n(self, n: usize) -> Self {
+        let mut v = self;
+        for _ in 0..n {
+            v = v.rot_y();
+        }
+        v
+    }
+    fn rot_z(self) -> Self {
+        Self {
+            x: self.y,
+            y: -self.x,
+            z: self.z,
+        }
+    }
+
+    fn rot_z_n(self, n: usize) -> Self {
+        let mut v = self;
+        for _ in 0..n {
+            v = v.rot_z();
+        }
+        v
     }
 }
 
@@ -181,8 +180,8 @@ pub mod test {
 
     #[test]
     pub fn test_matching() {
-        let first: HashSet<_> = (0..12).map(|i| Vector::new(i, 0, 0)).collect();
-        let second: HashSet<_> = (0..12)
+        let first: MySet = (0..12).map(|i| Vector::new(i, 0, 0)).collect();
+        let second: MySet = (0..12)
             .map(|i| Vector::new(-13000, 200, i + 3000))
             .collect();
         let m = matches(&first, &second);
