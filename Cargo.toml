@@ -13,6 +13,7 @@ reqwest = {version = "0.11.7", features = ["blocking"  ]}
 
 [dev-dependencies]
 criterion = "0.3"
+bencher = "0.1.5"
 
 [[bench]]
 name = "day19"
