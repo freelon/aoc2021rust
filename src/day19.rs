@@ -1,4 +1,5 @@
 use rustc_hash::FxHashSet;
+use std::ops::Sub;
 
 type MySet = FxHashSet<Vector>;
 
@@ -15,7 +16,7 @@ pub fn part2(input: &str) -> usize {
     let (_, centers) = combine(scans);
     centers
         .iter()
-        .flat_map(|a| centers.iter().map(|b| a.sub(*b).len()))
+        .flat_map(|a| centers.iter().map(|b| (*a - *b).len()))
         .max()
         .unwrap()
 }
@@ -41,10 +42,10 @@ fn matches(beacons: &MySet, other: &MySet) -> Option<(MySet, Vector)> {
     for a in beacons {
         for rotation in other.all_rotations() {
             for b in rotation.iter() {
-                let diff = b.sub(*a);
-                let realigned: MySet = rotation.iter().map(|v| v.sub(diff)).collect();
+                let diff = *b - *a;
+                let realigned: MySet = rotation.iter().map(|v| *v - diff).collect();
                 if beacons.intersection(&realigned).count() >= 12 {
-                    return Some((realigned, Vector::new(0, 0, 0).sub(diff)));
+                    return Some((realigned, Vector::new(0, 0, 0) - diff));
                 }
             }
         }
@@ -62,7 +63,7 @@ trait BeaconSet {
 
 impl BeaconSet for MySet {
     fn set_origin_to(&self, origin: Vector) -> Self {
-        self.iter().map(|v| v.sub(origin)).collect()
+        self.iter().map(|v| *v - origin).collect()
     }
 
     fn all_rotations(&self) -> Vec<Self> {
@@ -106,17 +107,21 @@ struct Vector {
     z: i32,
 }
 
-impl Vector {
-    fn new(x: i32, y: i32, z: i32) -> Self {
-        Self { x, y, z }
-    }
+impl Sub for Vector {
+    type Output = Self;
 
-    fn sub(&self, other: Self) -> Self {
+    fn sub(self, other: Self) -> Self {
         Self {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
         }
+    }
+}
+
+impl Vector {
+    fn new(x: i32, y: i32, z: i32) -> Self {
+        Self { x, y, z }
     }
 
     fn len(&self) -> usize {
