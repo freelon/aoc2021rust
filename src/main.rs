@@ -22,6 +22,6 @@ fn main() {
 
     let start = Instant::now();
     let result = day19::part2(&input);
-    println!("Computation took: {:?}", (Instant::now() - start));
+    println!("Computation took: {:?}", start.elapsed());
     println!("Result: {:?}", result);
 }
