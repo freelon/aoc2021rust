@@ -69,15 +69,13 @@ impl BeaconSet for MySet {
 
     fn all_rotations(&self) -> Vec<Self> {
         let mut result = vec![];
-        for x_rot in [0, 1] {
-            for y_rot in [0, 1, 2, 3] {
-                for z_rot in [0, 1, 2, 3] {
-                    let r = self
-                        .iter()
-                        .map(|v| v.rot_x_n(x_rot).rot_y_n(y_rot).rot_z_n(z_rot))
-                        .collect();
-                    result.push(r);
-                }
+        for (x_rot, y_rot) in [(1, 0), (3, 0), (0, 0), (0, 1), (0, 2), (0, 3)] {
+            for z_rot in [0, 1, 2, 3] {
+                let r = self
+                    .iter()
+                    .map(|v| v.rot_x_n(x_rot).rot_y_n(y_rot).rot_z_n(z_rot))
+                    .collect();
+                result.push(r);
             }
         }
         result
