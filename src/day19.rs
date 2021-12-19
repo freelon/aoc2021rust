@@ -173,7 +173,7 @@ impl Vector {
 }
 
 #[cfg(test)]
-mod test {
+pub mod test {
 
     use super::*;
 
