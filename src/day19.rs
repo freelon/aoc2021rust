@@ -3,13 +3,21 @@ use std::collections::HashSet;
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
     let scans = parse(input);
-    let beacons = combine(scans);
+    let (beacons, _) = combine(scans);
     beacons.len()
 }
 
-fn combine(mut scans: Vec<HashSet<Vector>>) -> HashSet<Vector> {
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    let scans = parse(input);
+    let (_, centers) = combine(scans);
+    centers.iter().flat_map(|a| centers.iter().map(|b| a.sub(*b).len())).max().unwrap()
+}
+
+fn combine(mut scans: Vec<HashSet<Vector>>) -> (HashSet<Vector>, Vec<Vector>) {
     let mut beacons = scans.remove(0);
-    while let Some((i, result)) = scans
+    let mut scanners = vec![Vector::new(0, 0, 0)];
+    while let Some((i, (result, scanner))) = scans
         .iter()
         .enumerate()
         .flat_map(|(i, scan)| matches(&beacons, scan).map(|r| (i, r)))
@@ -17,19 +25,23 @@ fn combine(mut scans: Vec<HashSet<Vector>>) -> HashSet<Vector> {
     {
         beacons = beacons.union(&result).map(|v| *v).collect();
         scans.remove(i);
+        scanners.push(scanner);
     }
     print!("");
-    beacons
+    (beacons, scanners)
 }
 
-fn matches(beacons: &HashSet<Vector>, other: &HashSet<Vector>) -> Option<HashSet<Vector>> {
+fn matches(
+    beacons: &HashSet<Vector>,
+    other: &HashSet<Vector>,
+) -> Option<(HashSet<Vector>, Vector)> {
     for a in beacons {
         for rotation in other.all_rotations() {
             for b in rotation.iter() {
                 let diff = b.sub(*a);
                 let realigned: HashSet<_> = rotation.iter().map(|v| v.sub(diff)).collect();
                 if beacons.intersection(&realigned).count() >= 12 {
-                    return Some(realigned);
+                    return Some((realigned, Vector::new(0, 0, 0).sub(diff)));
                 }
             }
         }
@@ -99,6 +111,10 @@ impl Vector {
             y: self.y - other.y,
             z: self.z - other.z,
         }
+    }
+
+    fn len(&self) -> usize {
+        (self.x.abs() + self.y.abs() + self.z.abs()) as usize
     }
 
     fn all_rotations(&self) -> Vec<Self> {
@@ -180,7 +196,7 @@ mod test {
     }
 
     #[test]
-    pub fn test2() {
-        // assert_eq!(part2(INPUT), 3993);
+    pub fn test_19_2() {
+        assert_eq!(part2(INPUT), 3621);
     }
 }
