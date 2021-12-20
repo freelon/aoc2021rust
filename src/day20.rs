@@ -4,20 +4,29 @@ type Image = FxHashMap<(i32, i32), char>;
 
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
+    run(input, 2)
+}
+
+#[allow(dead_code)]
+pub fn part2(input: &str) -> usize {
+    run(input, 50)
+}
+
+fn run(input: &str, factor: i32) -> usize {
     let (rule, mut image) = parse(input);
 
     let width = image.keys().max_by_key(|(x, _)| x).unwrap().0;
     let height = image.keys().max_by_key(|(_, y)| y).unwrap().1;
 
-    for x in -30..width + 30 {
-        for y in -30..height + 30 {
+    for x in -factor - 1..width + factor + 1 {
+        for y in -factor - 1..height + factor + 1 {
             if !image.contains_key(&(x, y)) {
                 image.insert((x, y), '.');
             }
         }
     }
 
-    (0..2)
+    (0..factor)
         .fold(image, |image, _| apply(image, &rule))
         .values()
         .filter(|c| **c == '#')
@@ -40,10 +49,7 @@ fn apply(image: Image, rule: &Vec<char>) -> Image {
                     _ => panic!("illegal char {}", c),
                 })
                 .collect();
-                let rule_index = usize::from_str_radix(&ns, 2).unwrap();
-                if *py < -2 && rule_index != 0 {
-                    println!("FUCK");
-                }
+            let rule_index = usize::from_str_radix(&ns, 2).unwrap();
             ((*px, *py), rule[rule_index])
         })
         .collect()
@@ -62,11 +68,6 @@ fn parse(input: &str) -> (Vec<char>, Image) {
         })
         .collect();
     (rule, image)
-}
-
-#[allow(dead_code)]
-pub fn part2(_input: &str) -> usize {
-    0
 }
 
 #[cfg(test)]
@@ -89,6 +90,6 @@ pub mod test {
 
     #[test]
     pub fn test_20_2() {
-        assert_eq!(part2(INPUT), 3621);
+        assert_eq!(part2(INPUT), 3351);
     }
 }
