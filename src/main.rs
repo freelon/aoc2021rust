@@ -3,6 +3,7 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day16;
 mod day17;
 mod day18;
 mod day19;
@@ -19,10 +20,10 @@ fn main() {
         .parse_env(env)
         .init();
 
-    let input = inputs::input(2021, 20);
+    let input = inputs::input(2021, 16);
 
     let start = Instant::now();
-    let result = day20::part2(&input);
+    let result = day16::part1(&input);
     println!("Computation took: {:?}", start.elapsed());
     println!("Result: {:?}", result);
 }
