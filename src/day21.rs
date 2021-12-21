@@ -43,8 +43,82 @@ fn play(v: &Vec<usize>) -> (usize, usize) {
 }
 
 #[allow(dead_code)]
-pub fn part2(_input: &str) -> usize {
-    0
+pub fn part2(input: &str) -> usize {
+    let v: Vec<_> = input
+        .trim()
+        .lines()
+        .map(|line| line.split_once(": ").unwrap().1)
+        .map(|s| s.parse::<usize>().unwrap())
+        .collect();
+    let target = TurnResult {
+        pos1: v[0] as i8,
+        pos2: v[1] as i8,
+        points1: 0,
+        points2: 0,
+        turn: 1,
+    };
+    dbg!(&target);
+    let result = run(target);
+    dbg!(result);
+    std::cmp::max(result.0, result.1)
+} // 919758187195363 too high
+
+fn run(state: TurnResult) -> (usize, usize) {
+    if let Some(win) = state.wins() {
+        return win;
+    }
+
+    (3..=9).fold((0, 0), |(acc1, acc2), step_length| {
+        let mut new = TurnResult { ..state };
+        if state.turn == 1 {
+            new.pos1 += step_length;
+            if new.pos1 > 10 {
+                new.pos1 %= 10;
+            }
+            new.points1 += new.pos1;
+            new.turn = 2;
+
+            let (a1, a2) = run(new);
+            let multiplicator = ROLL_DISTRIBUTION[step_length as usize];
+            (acc1 + multiplicator * a1, acc2 + multiplicator * a2)
+        } else if state.turn == 2 {
+            new.pos2 += step_length;
+            if new.pos2 > 10 {
+                new.pos2 %= 10;
+            }
+            new.points2 += new.pos2;
+            new.turn = 1;
+
+            let (a1, a2) = run(new);
+            let multiplicator = ROLL_DISTRIBUTION[step_length as usize];
+            (acc1 + multiplicator * a1, acc2 + multiplicator * a2)
+        } else {
+            panic!("oops");
+        }
+    })
+}
+
+const ROLL_DISTRIBUTION: [usize; 10] = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1];
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+struct TurnResult {
+    pos1: i8,
+    pos2: i8,
+    points1: i8,
+    points2: i8,
+    turn: i8,
+}
+
+impl TurnResult {
+    fn wins(&self) -> Option<(usize, usize)> {
+        if self.points1 >= 21 {
+            return Some((1, 0));
+        }
+        if self.points2 >= 21 {
+            return Some((0, 1));
+        }
+        None
+    }
 }
 
 #[cfg(test)]
@@ -63,6 +137,6 @@ Player 2 starting position: 8
 
     #[test]
     pub fn test_21_2() {
-        assert_eq!(part2(INPUT), 3351);
+        assert_eq!(part2(INPUT), 444356092776315);
     }
 }
