@@ -1,3 +1,5 @@
+use rustc_hash::FxHashMap;
+
 #[allow(dead_code)]
 pub fn part1(input: &str) -> usize {
     let v: Vec<_> = input
@@ -58,17 +60,22 @@ pub fn part2(input: &str) -> usize {
         turn: 1,
     };
     dbg!(&target);
-    let result = run(target);
+    let mut cache = FxHashMap::<TurnResult, (usize, usize)>::default();
+    let result = run(target, &mut cache);
     dbg!(result);
     std::cmp::max(result.0, result.1)
 } // 919758187195363 too high
 
-fn run(state: TurnResult) -> (usize, usize) {
+fn run(state: TurnResult, mut cache: &mut FxHashMap<TurnResult, (usize, usize)>) -> (usize, usize) {
     if let Some(win) = state.wins() {
         return win;
     }
 
-    (3..=9).fold((0, 0), |(acc1, acc2), step_length| {
+    if let Some(result) = cache.get(&state) {
+        return *result;
+    }
+
+    let result = (3..=9).fold((0, 0), |(acc1, acc2), step_length| {
         let mut new = TurnResult { ..state };
         if state.turn == 1 {
             new.pos1 += step_length;
@@ -78,7 +85,7 @@ fn run(state: TurnResult) -> (usize, usize) {
             new.points1 += new.pos1;
             new.turn = 2;
 
-            let (a1, a2) = run(new);
+            let (a1, a2) = run(new, &mut cache);
             let multiplicator = ROLL_DISTRIBUTION[step_length as usize];
             (acc1 + multiplicator * a1, acc2 + multiplicator * a2)
         } else if state.turn == 2 {
@@ -89,13 +96,15 @@ fn run(state: TurnResult) -> (usize, usize) {
             new.points2 += new.pos2;
             new.turn = 1;
 
-            let (a1, a2) = run(new);
+            let (a1, a2) = run(new, &mut cache);
             let multiplicator = ROLL_DISTRIBUTION[step_length as usize];
             (acc1 + multiplicator * a1, acc2 + multiplicator * a2)
         } else {
             panic!("oops");
         }
-    })
+    });
+    cache.insert(state, result);
+    result
 }
 
 const ROLL_DISTRIBUTION: [usize; 10] = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1];
