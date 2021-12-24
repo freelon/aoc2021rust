@@ -87,17 +87,17 @@ fn parse(input: &str) -> Map {
 }
 
 #[derive(Eq, PartialEq, Hash, Clone, Copy, Debug, Ord, PartialOrd)]
-struct Position {
-    x: i32,
-    y: i32,
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Position {
-    fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Position { x, y }
     }
 
-    fn neighbors(&self) -> Vec<Position> {
+    pub fn neighbors(&self) -> Vec<Position> {
         vec![
             Position::new(self.x - 1, self.y),
             Position::new(self.x + 1, self.y),
@@ -105,10 +105,20 @@ impl Position {
             Position::new(self.x, self.y + 1),
         ]
     }
+
+    #[allow(dead_code)]
+    pub fn distance(&self, o: &Self) -> usize {
+        ((self.x - o.x).abs() + (self.y - o.y).abs()) as usize
+    }
 }
 
 #[cfg(test)]
 mod test {
+
+    #[test]
+    fn distance() {
+        assert_eq!(Position::new(1,1).distance(&Position::new(2,2)), 2);
+    }
 
     use super::*;
 
