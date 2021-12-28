@@ -1,5 +1,5 @@
 use aoc2021rust::day19::*;
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, Criterion};
 
 use bencher::*;
 
