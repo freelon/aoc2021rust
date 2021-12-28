@@ -1,4 +1,5 @@
 use crate::day15::Position;
+use human_format::Formatter;
 use priority_queue::PriorityQueue;
 use rustc_hash::FxHashMap;
 use rustc_hash::FxHashSet;
@@ -30,10 +31,10 @@ fn solve(state: State) -> State {
         counter += 1;
         if counter % 10_000 == 0 {
             println!(
-                "Visited {}k, current cost: {} (queue size {})",
-                counter / 1000,
+                "Visited {}, current cost: {} (queue size {})",
+                Formatter::new().with_decimals(1).format(counter as f64),
                 next_cost.0,
-                open.len()
+                Formatter::new().with_decimals(1).format(open.len() as f64)
             );
         }
         if next.is_solved() {

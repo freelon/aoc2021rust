@@ -13,6 +13,7 @@ reqwest = {version = "0.11.7", features = ["blocking"  ]}
 rustc-hash = "1.1.0"
 nom = "7.1.0"
 priority-queue = "1.2.1"
+human_format = "1.0.3"
 
 [dev-dependencies]
 criterion = "0.3"
