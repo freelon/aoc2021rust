@@ -22,3 +22,7 @@ bencher = "0.1.5"
 [[bench]]
 name = "day19"
 harness = false
+
+[[bench]]
+name = "day23"
+harness = false
