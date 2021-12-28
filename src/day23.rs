@@ -19,7 +19,7 @@ struct Position {
 }
 
 impl Position {
-    fn new(x: i32, y: i32) -> Self {
+    const fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 
@@ -131,6 +131,36 @@ struct State {
 
 const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
 
+const SPOTS: [Position; 27] = [
+    Position::new(1, 1),
+    Position::new(2, 1),
+    Position::new(3, 1),
+    Position::new(4, 1),
+    Position::new(5, 1),
+    Position::new(6, 1),
+    Position::new(7, 1),
+    Position::new(8, 1),
+    Position::new(9, 1),
+    Position::new(10, 1),
+    Position::new(11, 1),
+    Position::new(3, 2),
+    Position::new(3, 3),
+    Position::new(3, 4),
+    Position::new(3, 5),
+    Position::new(5, 2),
+    Position::new(5, 3),
+    Position::new(5, 4),
+    Position::new(5, 5),
+    Position::new(7, 2),
+    Position::new(7, 3),
+    Position::new(7, 4),
+    Position::new(7, 5),
+    Position::new(9, 2),
+    Position::new(9, 3),
+    Position::new(9, 4),
+    Position::new(9, 5),
+];
+
 impl State {
     fn get(&self, p: Position) -> u8 {
         self.map[p.x as usize][p.y as usize]
@@ -155,12 +185,11 @@ impl State {
     }
 
     fn follow_ups(&self) -> Vec<Self> {
-        (0..WIDTH)
-            .flat_map(|x| {
-                (0..HEIGHT).map(move |y| (Position::new(x as i32, y as i32), self.map[x][y]))
-            })
+        SPOTS
+            .iter()
+            .map(|p| (p, self.get(*p)))
             .filter(|(_, c)| c.is_ascii_alphabetic())
-            .flat_map(|(p, c)| self.follow_upss(p, c))
+            .flat_map(|(p, c)| self.follow_upss(*p, c))
             .collect()
     }
 

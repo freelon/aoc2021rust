@@ -18,7 +18,7 @@ const INPUT2: &str = "#############
 ";
 
 pub fn day23_bench(c: &mut Criterion) {
-    c.bench_function("day 23 part 2", |b| b.iter(|| part1(INPUT)));
+    c.bench_function("day 23 part 1", |b| b.iter(|| part1(INPUT)));
 }
 
 pub fn day23_2_bench(c: &mut Criterion) {
