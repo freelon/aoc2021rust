@@ -58,7 +58,7 @@ fn parse(input: &str) -> Map {
         .lines()
         .enumerate()
         .flat_map(|(y, line)| {
-            line.chars()
+            line.bytes()
                 .enumerate()
                 .map(move |(x, c)| (Position::new(x as i32, y as i32), c))
         })
@@ -75,7 +75,7 @@ pub fn part2(_input: &str) -> usize {
 
 const HEIGHT: usize = 7;
 const WIDTH: usize = 14;
-type Map = [[char; HEIGHT]; WIDTH];
+type Map = [[u8; HEIGHT]; WIDTH];
 
 #[derive(Clone, Hash)]
 struct State {
@@ -103,24 +103,24 @@ impl PartialEq for State {
     }
 }
 
-const TARGETS: [(i32, char); 4] = [(3, 'A'), (5, 'B'), (7, 'C'), (9, 'D')];
+const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
 
 impl State {
-    fn get(&self, p: Position) -> char {
+    fn get(&self, p: Position) -> u8 {
         self.map[p.x as usize][p.y as usize]
     }
-    fn set(&mut self, p: Position, c: char) {
+    fn set(&mut self, p: Position, c: u8) {
         self.map[p.x as usize][p.y as usize] = c;
     }
 
     fn is_solved(&self) -> bool {
-        if (1..WIDTH).any(|x| self.get(Position::new(x as i32, 1)).is_alphabetic()) {
+        if (1..WIDTH).any(|x| self.get(Position::new(x as i32, 1)).is_ascii_alphabetic()) {
             return false;
         }
         for (x, c) in TARGETS {
             if (2..HEIGHT).any(|y| {
                 let occ = self.get(Position::new(x, y as i32));
-                occ.is_alphabetic() && occ != c
+                occ.is_ascii_alphabetic() && occ != c
             }) {
                 return false;
             }
@@ -133,20 +133,20 @@ impl State {
             .flat_map(|x| {
                 (0..HEIGHT).map(move |y| (Position::new(x as i32, y as i32), self.map[x][y]))
             })
-            .filter(|(_, c)| c.is_alphanumeric())
+            .filter(|(_, c)| c.is_ascii_alphabetic())
             .flat_map(|(p, c)| self.follow_upss(p, c))
             .collect()
     }
 
     fn field_allowed(&self, _from: Position, to: Position) -> bool {
-        if self.get(to) != '.' {
+        if self.get(to) != b'.' {
             return false;
         }
 
         return true;
     }
 
-    fn follow_upss(&self, p: Position, c: char) -> Vec<Self> {
+    fn follow_upss(&self, p: Position, c: u8) -> Vec<Self> {
         let mut visited: FxHashMap<Position, usize> = FxHashMap::default();
         let mut open: Vec<(Position, usize)> = p
             .neighbors()
@@ -175,10 +175,10 @@ impl State {
             .map(|(np, dist)| {
                 let cost = dist
                     * match c {
-                        'A' => 1,
-                        'B' => 10,
-                        'C' => 100,
-                        'D' => 1000,
+                        b'A' => 1,
+                        b'B' => 10,
+                        b'C' => 100,
+                        b'D' => 1000,
                         _ => panic!("Cannot move walls or other things"),
                     };
                 let mut new_state = State {
@@ -186,13 +186,13 @@ impl State {
                     cost: self.cost + cost,
                 };
                 new_state.set(np, c);
-                new_state.set(p, '.');
+                new_state.set(p, b'.');
                 new_state
             })
             .collect()
     }
 
-    fn valid_target(&self, from: &Position, to: &Position, c: char) -> bool {
+    fn valid_target(&self, from: &Position, to: &Position, c: u8) -> bool {
         if from.y == 1 && to.y == 1 {
             return false;
         }
@@ -204,7 +204,7 @@ impl State {
             if let Some((col, d)) = TARGETS.iter().filter(|it| it.0 == to.x).next() {
                 if (2..=5).any(|row| {
                     let occupant = self.map[*col as usize][row as usize];
-                    occupant.is_alphanumeric() && occupant != *d
+                    occupant.is_ascii_alphabetic() && occupant != *d
                 }) {
                     return false;
                 }
