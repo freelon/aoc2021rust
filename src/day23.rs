@@ -3,10 +3,6 @@ use human_format::Formatter;
 use priority_queue::PriorityQueue;
 use rustc_hash::FxHashMap;
 use rustc_hash::FxHashSet;
-use std::cmp::Eq;
-use std::cmp::Ord;
-use std::cmp::PartialEq;
-use std::cmp::PartialOrd;
 use std::cmp::Reverse;
 use std::fmt::Debug;
 
@@ -82,26 +78,6 @@ type Map = [[u8; HEIGHT]; WIDTH];
 struct State {
     map: Map,
     cost: usize,
-}
-
-impl Ord for State {
-    fn cmp(&self, o: &Self) -> std::cmp::Ordering {
-        self.cost.cmp(&o.cost).reverse()
-    }
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, o: &Self) -> std::option::Option<std::cmp::Ordering> {
-        self.cost.partial_cmp(&o.cost).map(|c| c.reverse())
-    }
-}
-
-impl Eq for State {}
-
-impl PartialEq for State {
-    fn eq(&self, o: &Self) -> bool {
-        self.cost == o.cost
-    }
 }
 
 const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
@@ -205,7 +181,8 @@ impl State {
             if let Some((col, d)) = TARGETS.iter().filter(|it| it.0 == to.x).next() {
                 if (2..=5).any(|row| {
                     let occupant = self.map[*col as usize][row as usize];
-                    occupant.is_ascii_alphabetic() && occupant != *d
+                    (occupant.is_ascii_alphabetic() && occupant != *d)
+                        || (row > to.y && occupant == b'.')
                 }) {
                     return false;
                 }
