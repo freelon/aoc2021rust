@@ -131,6 +131,8 @@ struct State {
 
 const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
 
+const ROOMS: [i32; 4] = [3, 5, 7, 9];
+
 const SPOTS: [Position; 27] = [
     Position::new(1, 1),
     Position::new(2, 1),
@@ -248,7 +250,7 @@ impl State {
             return false;
         }
 
-        if to.y == 1 && !TARGETS.iter().filter(|it| it.0 == to.x).next().is_some() {
+        if to.y == 1 && !ROOMS.contains(&to.x) {
             return true;
         }
         if to.y > 1 {
