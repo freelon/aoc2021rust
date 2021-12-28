@@ -249,6 +249,9 @@ impl State {
         if from.y == 1 && to.y == 1 {
             return false;
         }
+        if from.y > 1 && to.y > 1 {
+            return false;
+        }
 
         if to.y == 1 && !ROOMS.contains(&to.x) {
             return true;
