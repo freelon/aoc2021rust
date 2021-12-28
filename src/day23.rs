@@ -238,7 +238,11 @@ impl State {
                     map: self.map.clone(),
                     cost: self.cost + cost,
                 };
-                new_state.set(np, c);
+                if np.y > 1 {
+                    new_state.set(np, b'*');
+                } else {
+                    new_state.set(np, c);
+                }
                 new_state.set(p, b'.');
                 new_state
             })
@@ -281,7 +285,7 @@ impl Debug for State {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 let c = self.get(Position::new(x as i32, y as i32));
-                write!(f, "{}", c)?;
+                write!(f, "{}", c as char)?;
             }
             writeln!(f)?;
         }

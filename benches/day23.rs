@@ -17,7 +17,7 @@ const INPUT2: &str = "#############
   #########
 ";
 
-pub fn day23_bench(c: &mut Criterion) {
+pub fn day23_1_bench(c: &mut Criterion) {
     c.bench_function("day 23 part 1", |b| b.iter(|| part1(INPUT)));
 }
 
@@ -29,13 +29,7 @@ use std::time::Duration;
 criterion_group!(name = fast;
     config = Criterion::default()
     .warm_up_time(Duration::from_secs(10))
-    .sample_size(15)
-    .measurement_time(Duration::from_secs(50));
-    targets = day23_bench);
-criterion_group!(name = slow;
-    config = Criterion::default()
-    .warm_up_time(Duration::from_secs(30))
-    .sample_size(10)
-    .measurement_time(Duration::from_secs(300));
-    targets =  day23_2_bench);
-criterion_main!(fast, slow);
+    .sample_size(20)
+    .measurement_time(Duration::from_secs(30));
+    targets = day23_1_bench, day23_2_bench);
+criterion_main!(fast);
