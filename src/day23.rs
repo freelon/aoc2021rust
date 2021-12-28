@@ -1,4 +1,3 @@
-use crate::day15::Position;
 use human_format::Formatter;
 use priority_queue::PriorityQueue;
 use rustc_hash::FxHashMap;
@@ -11,6 +10,56 @@ pub fn part1(input: &str) -> usize {
     let map = parse(input);
     let start = State { map, cost: 0 };
     solve(start).cost
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct Position {
+    x: i32,
+    y: i32,
+}
+
+impl Position {
+    fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+
+    fn neighbors(&self) -> Vec<Self> {
+        match self.y {
+            1 => match self.x {
+                3 | 5 | 7 | 9 => vec![self.left(), self.right(), self.down()],
+                _ => vec![self.left(), self.right()],
+            },
+            _ => vec![self.up(), self.down()],
+        }
+    }
+
+    fn left(&self) -> Self {
+        Self {
+            x: self.x - 1,
+            ..*self
+        }
+    }
+
+    fn right(&self) -> Self {
+        Self {
+            x: self.x + 1,
+            ..*self
+        }
+    }
+
+    fn up(&self) -> Self {
+        Self {
+            y: self.y - 1,
+            ..*self
+        }
+    }
+
+    fn down(&self) -> Self {
+        Self {
+            y: self.y + 1,
+            ..*self
+        }
+    }
 }
 
 fn solve(state: State) -> State {
@@ -116,11 +165,7 @@ impl State {
     }
 
     fn field_allowed(&self, _from: Position, to: Position) -> bool {
-        if self.get(to) != b'.' {
-            return false;
-        }
-
-        return true;
+        self.get(to) == b'.'
     }
 
     fn follow_upss(&self, p: Position, c: u8) -> Vec<Self> {
