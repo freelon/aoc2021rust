@@ -199,8 +199,22 @@ impl State {
             .collect()
     }
 
-    fn field_allowed(&self, _from: Position, to: Position) -> bool {
-        self.get(to) == b'.'
+    fn field_allowed(&self, from: Position, to: Position) -> bool {
+        let is_empty = self.get(to) == b'.';
+        let is_corridor = to.y == 1;
+        let is_own_room = {
+            let c = self.get(from);
+            let target_col_for_c = match c {
+                b'A' => TARGET_A,
+                b'B' => TARGET_B,
+                b'C' => TARGET_C,
+                b'D' => TARGET_D,
+                _ => panic!("unknown c '{}'", c as char),
+            };
+            !is_corridor && to.x == target_col_for_c
+        };
+        let is_entering = from.x != to.x;
+        is_empty && (is_corridor || (is_entering && is_own_room) || !is_entering)
     }
 
     fn follow_upss(&self, p: Position, c: u8) -> Vec<Self> {
@@ -272,9 +286,6 @@ impl State {
                 b'D' => TARGET_D,
                 _ => panic!("unknown c '{}'", c as char),
             };
-            if to.x != target_col_for_c {
-                return false;
-            }
             if (2..=5).any(|row| {
                 let occupant = self.map[target_col_for_c as usize][row as usize];
                 (occupant.is_ascii_alphabetic() && occupant != c)
