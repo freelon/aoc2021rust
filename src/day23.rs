@@ -130,6 +130,10 @@ struct State {
 }
 
 const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
+const TARGET_A: i32 = 3;
+const TARGET_B: i32 = 5;
+const TARGET_C: i32 = 7;
+const TARGET_D: i32 = 9;
 
 const ROOMS: [i32; 4] = [3, 5, 7, 9];
 
@@ -261,19 +265,25 @@ impl State {
             return true;
         }
         if to.y > 1 {
-            if let Some((col, d)) = TARGETS.iter().filter(|it| it.0 == to.x).next() {
-                if (2..=5).any(|row| {
-                    let occupant = self.map[*col as usize][row as usize];
-                    (occupant.is_ascii_alphabetic() && occupant != *d)
-                        || (row > to.y && occupant == b'.')
-                }) {
-                    return false;
-                }
-
-                if *d == c {
-                    return true;
-                }
+            let target_col_for_c = match c {
+                b'A' => TARGET_A,
+                b'B' => TARGET_B,
+                b'C' => TARGET_C,
+                b'D' => TARGET_D,
+                _ => panic!("unknown c '{}'", c as char),
+            };
+            if to.x != target_col_for_c {
+                return false;
             }
+            if (2..=5).any(|row| {
+                let occupant = self.map[target_col_for_c as usize][row as usize];
+                (occupant.is_ascii_alphabetic() && occupant != c)
+                    || (row > to.y && occupant == b'.')
+            }) {
+                return false;
+            }
+
+            return true;
         }
 
         false
