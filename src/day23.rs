@@ -14,12 +14,12 @@ pub fn part1(input: &str) -> usize {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Position {
-    x: i32,
-    y: i32,
+    x: i8,
+    y: i8,
 }
 
 impl Position {
-    const fn new(x: i32, y: i32) -> Self {
+    const fn new(x: i8, y: i8) -> Self {
         Self { x, y }
     }
 
@@ -106,7 +106,7 @@ fn parse(input: &str) -> Map {
         .flat_map(|(y, line)| {
             line.bytes()
                 .enumerate()
-                .map(move |(x, c)| (Position::new(x as i32, y as i32), c))
+                .map(move |(x, c)| (Position::new(x as i8, y as i8), c))
         })
         .fold(Map::default(), |mut map, (position, c)| {
             map[position.x as usize][position.y as usize] = c;
@@ -129,13 +129,13 @@ struct State {
     cost: usize,
 }
 
-const TARGETS: [(i32, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
-const TARGET_A: i32 = 3;
-const TARGET_B: i32 = 5;
-const TARGET_C: i32 = 7;
-const TARGET_D: i32 = 9;
+const TARGETS: [(i8, u8); 4] = [(3, b'A'), (5, b'B'), (7, b'C'), (9, b'D')];
+const TARGET_A: i8 = 3;
+const TARGET_B: i8 = 5;
+const TARGET_C: i8 = 7;
+const TARGET_D: i8 = 9;
 
-const ROOMS: [i32; 4] = [3, 5, 7, 9];
+const ROOMS: [i8; 4] = [3, 5, 7, 9];
 
 const SPOTS: [Position; 27] = [
     Position::new(1, 1),
@@ -176,12 +176,12 @@ impl State {
     }
 
     fn is_solved(&self) -> bool {
-        if (1..WIDTH).any(|x| self.get(Position::new(x as i32, 1)).is_ascii_alphabetic()) {
+        if (1..WIDTH).any(|x| self.get(Position::new(x as i8, 1)).is_ascii_alphabetic()) {
             return false;
         }
         for (x, c) in TARGETS {
             if (2..HEIGHT).any(|y| {
-                let occ = self.get(Position::new(x, y as i32));
+                let occ = self.get(Position::new(x, y as i8));
                 occ.is_ascii_alphabetic() && occ != c
             }) {
                 return false;
@@ -305,7 +305,7 @@ impl Debug for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
-                let c = self.get(Position::new(x as i32, y as i32));
+                let c = self.get(Position::new(x as i8, y as i8));
                 write!(f, "{}", c as char)?;
             }
             writeln!(f)?;
