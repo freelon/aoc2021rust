@@ -86,13 +86,12 @@ fn solve(state: State) -> State {
             return next;
         }
 
-        if inspection.contains(&next.map) {
-            continue;
-        }
-
-        next.follow_ups().into_iter().for_each(|f| {
-            open.push_increase(f.map, Reverse(f.cost));
-        });
+        next.follow_ups()
+            .into_iter()
+            .filter(|state| !inspection.contains(&state.map))
+            .for_each(|f| {
+                open.push_increase(f.map, Reverse(f.cost));
+            });
         inspection.insert(next.map.clone());
     }
 
