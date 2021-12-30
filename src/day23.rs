@@ -216,7 +216,7 @@ impl State {
         is_empty && (is_corridor || (is_entering && is_own_room) || !is_entering)
     }
 
-    fn follow_upss(&self, p: Position, c: u8) -> Vec<Self> {
+    fn reachable_fields(&self, p: Position) -> FxHashMap<Position, usize> {
         let mut visited: FxHashMap<Position, usize> = FxHashMap::default();
         let mut open: Vec<(Position, usize)> = p
             .neighbors()
@@ -238,8 +238,11 @@ impl State {
             }
             visited.insert(next, csf);
         }
-
         visited
+    }
+
+    fn follow_upss(&self, p: Position, c: u8) -> Vec<Self> {
+        self.reachable_fields(p)
             .into_iter()
             .filter(|(np, _)| self.valid_target(&p, np, c))
             .map(|(np, dist)| {
